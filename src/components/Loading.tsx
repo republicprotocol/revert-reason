@@ -1,7 +1,8 @@
 import * as React from "react";
 
+import "../styles/Loading.css";
+
 interface LoadingProps {
-    alt?: boolean;
 }
 
 interface LoadingState {
@@ -12,9 +13,8 @@ interface LoadingState {
  */
 class Loading extends React.Component<LoadingProps, LoadingState> {
     public render(): JSX.Element {
-        const { alt } = this.props;
         return (
-            <div className={`loading lds-dual-ring ${alt ? "alt" : ""}`} />
+            <div id="loader" />
         );
     }
 }
