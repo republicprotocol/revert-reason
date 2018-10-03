@@ -6,9 +6,10 @@ import Loading from "./Loading";
 
 import { abiOutputMapping, getReturnValue, getSource, getWeb3, Response, ResponseStatus } from "../lib/api";
 import Search from "./Search";
-import Source from "./Source";
+import Source, { MarkerDetails } from "./Source";
 
 interface WhyState {
+    markers: MarkerDetails[];
     transactionReturn: Response | null;
     returnValues: string[] | null;
     error: Error | null;
@@ -24,6 +25,7 @@ class Why extends React.Component<WhyProps, WhyState> {
     constructor(props: WhyProps, context: object) {
         super(props, context);
         this.state = {
+            markers: [],
             error: null,
             loading: false,
             transactionReturn: null,
@@ -33,7 +35,7 @@ class Why extends React.Component<WhyProps, WhyState> {
     }
 
     public render() {
-        const { error, transactionReturn, loading, source } = this.state;
+        const { error, transactionReturn, loading, source, markers } = this.state;
 
         let errorBlock;
         if (error) {
@@ -83,9 +85,13 @@ class Why extends React.Component<WhyProps, WhyState> {
 
             {errorBlock}
             {resultBlock}
-            {source && transactionReturn && transactionReturn.reason ? <div className="block">
-                <Source search={transactionReturn.reason} source={source} />
-            </div> : null}
+            {source ?
+                markers.map(marker =>
+                    <div key={`${marker.startCol}${marker.startRow}`} className="block">
+                        <Source marker={marker} source={source} />
+                    </div>
+                ) : null
+            }
         </div>;
     }
 
@@ -136,9 +142,40 @@ class Why extends React.Component<WhyProps, WhyState> {
                 this.setState({ returnValues });
             }
         } else if (transactionReturn.status === ResponseStatus.REVERTED && transactionReturn.reason && source) {
-            this.setState({ source });
+            const regex = new RegExp(transactionReturn.reason, "g");
+
+            const markers: MarkerDetails[] = [];
+
+            let match = regex.exec(source);
+            while (match !== null) {
+                const initialRowAndColumn = rowAndColumn(source.slice(0, match.index));
+                const endRowAndColumn = rowAndColumn(source.slice(0, match.index + transactionReturn.reason.length));
+                // For now, highlight whole lines (Ace editor's columns seem a bit broken)
+                markers.push({
+                    startRow: initialRowAndColumn[0],
+                    startCol: 0,
+                    endRow: endRowAndColumn[0],
+                    endCol: 10000000,
+                });
+                match = regex.exec(source);
+            }
+
+            console.log(match);
+
+            // { startRow: row, startCol: 0, endRow: row + 1, endCol: 0, className: "highlighMarker", type: "text" }
+
+            if (markers.length > 0) {
+                this.setState({ markers, source });
+            }
         }
     }
 }
+
+const rowAndColumn = (str: string): [number, number] => {
+    const split = str.split("\n");
+    const row = split.length - 1;
+    const column = split[split.length - 1].length;
+    return [row, column];
+};
 
 export default Why;

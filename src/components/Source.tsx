@@ -10,11 +10,18 @@ import "brace/theme/github";
 
 interface SourceProps {
     source: string;
-    search: string | null;
+    marker: MarkerDetails;
 }
 
 interface SourceState {
     markers: any[];
+}
+
+export interface MarkerDetails {
+    startRow: number;
+    startCol: number;
+    endRow: number;
+    endCol: number;
 }
 
 class Source extends React.Component<SourceProps, SourceState> {
@@ -39,12 +46,13 @@ class Source extends React.Component<SourceProps, SourceState> {
         // Wrap long lines
         session.setUseWrapMode(true);
 
-
-        const row = this.getMarkers();
-        const markers = [];
-        markers.push({ startRow: row, startCol: 0, endRow: row + 1, endCol: 0, className: "highlighMarker", type: "text" });
+        const { marker } = this.props;
+        console.log(marker);
+        const markers = [{
+            ...marker, className: "highlighMarker", type: "text"
+        }];
         this.setState({ markers });
-        editor.gotoLine(row + 1);
+        editor.gotoLine(marker.startRow + 1);
 
         // // When the editor content is changed, recalculate editor height (to avoid scrolling)
         // const onChange = (arg: any, activeEditor: any) => {
@@ -75,23 +83,6 @@ class Source extends React.Component<SourceProps, SourceState> {
             markers={this.state.markers}
         />;
     }
-
-    private getMarkers = (): number => {
-        const { source, search } = this.props;
-        if (!search) {
-            return 0;
-        }
-
-        const source2 = source.split("\n");
-        let n;
-        for (n = 0; n < source2.length; n++) {
-            if (source2[n].includes(search)) {
-                return n;
-            }
-        }
-        return 0;
-    }
-
 }
 
 export default Source;
