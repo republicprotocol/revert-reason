@@ -13,7 +13,6 @@ html {
 input[type=text],
 input[type=password] {
   background-color: #fff;
-  color: #3a3a3a;
   padding: 14px 15px 14px 15px;
   height: 66px;
   width: 100%;
@@ -87,7 +86,6 @@ input[type=text]:disabled {
 
 .Reason .Reason-options {
   background-color: #fff;
-  color: #3a3a3a;
   padding: 14px 15px 14px 15px;
   height: 66px;
   font-size: 18px;
@@ -153,7 +151,7 @@ input[type=text]:disabled {
   margin: 0 auto;
   border-radius: 50%;
   border: 2px solid;
-  border-color: black transparent black transparent;
+  border-color: #001c3a transparent #001c3a transparent;
   animation: lds-dual-ring 1.2s linear infinite;
 }
 
@@ -180,11 +178,9 @@ input[type=text]:disabled {
   padding: 15px 0;
 }
 
-.reason,
 .error,
-.returnRaw {
+.result {
   /* background-color: #fff; */
-  color: #3a3a3a;
   padding: 24px 15px 24px 15px;
   width: 100%;
   box-sizing: border-box;
@@ -202,8 +198,15 @@ input[type=text]:disabled {
 .block {
   margin-bottom: 20px;
   background-color: white;
-  box-shadow: 6px 6px 0px black;
-  border: 1px solid black;
+  box-shadow: 6px 6px 0px #001c3a;
+  border: 1px solid #001c3a;
+}
+
+.block-error {
+  margin-bottom: 20px;
+  background-color: white;
+  box-shadow: 6px 6px 0px rgb(255, 101, 101);
+  border: 1px solid rgb(255, 101, 101);
 }
 
 
@@ -225,6 +228,11 @@ input[type=text]:disabled {
   flex: 1;
   max-width: 150px;
 }
+
+/* 
+.select-network div {
+  color: #001c3a;
+} */
 
 .red {
   color: rgb(255, 101, 101);

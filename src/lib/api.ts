@@ -1,13 +1,20 @@
 import axios from "axios";
 
 import Web3 from "web3";
-import { JsonRPCResponse } from "web3/types";
+import { JsonRPCResponse, Transaction } from "web3/types";
 
 // Matches a 32-byte transaction ID (starting with 0x)
 const txHashRegExp = new RegExp(/^0x([A-Fa-f0-9]{64})$/);
 
 interface TraceLog {
-
+    pc: number;
+    op: string;
+    gas: number;
+    gasCost: number;
+    depth: number;
+    stack: string[];
+    memory: string[];
+    storage: any;
 }
 
 type TraceError = string | { message: string, code: number };
@@ -41,25 +48,36 @@ export const getWeb3 = (network: string) => {
     }
 };
 
-export const getReturnValue = async (web3: Web3, txHash: string): Promise<[string | null, string | null]> => {
+export enum ResponseStatus {
+    SUCCESS = "SUCCESS",
+    REVERTED = "REVERTED",
+    OUT_OF_GAS = "OUT_OF_GAS",
+    BAD_INSTRUCTION = "BAD_INSTRUCTION",
+    BAD_JUMP = "BAD_JUMP",
+}
+
+export interface Response {
+    status: ResponseStatus;
+    reason: string;
+}
+
+export const getReturnValue = async (web3: Web3, tx: Transaction): Promise<Response> => {
     // TODO: Generate Infura API key
 
-    if (txHash.slice(0, 2) !== "0x") {
-        txHash = "0x" + txHash;
+    if (tx.hash.slice(0, 2) !== "0x") {
+        tx.hash = "0x" + tx.hash;
     }
 
-    if (!txHashRegExp.test(txHash)) {
+    if (!txHashRegExp.test(tx.hash)) {
         throw new Error("Invalid transaction hash.");
     }
-
-    // Extend Web3
 
     // Get trace from Infura
     // TODO: traceTransaction is very heavy. Look into retrieving the memory and
     // stack at the last execution step instead.
     const response: Trace = await new Promise((resolve: (val: Trace) => void, reject) => web3.currentProvider.send({
         method: "debug_traceTransaction",
-        params: [txHash, {}],
+        params: [tx.hash, {}],
         jsonrpc: "2.0",
         id: 2
     }, (e, val) => {
@@ -81,15 +99,49 @@ export const getReturnValue = async (web3: Web3, txHash: string): Promise<[strin
 
     const result = response.result;
 
-    if (result.failed) {
-        if (result.returnValue.slice(0, 8) === "08c379a0") {
-            return [null, web3.eth.abi.decodeParameter("string", result.returnValue.slice(8))];
-        } else {
-            throw new Error("No revert reason found");
-        }
-    } else {
-        return [`0x${result.returnValue}`, null];
+    if (!result.failed) {
+        return {
+            status: ResponseStatus.SUCCESS,
+            reason: `0x${result.returnValue}`,
+        };
     }
+
+    const lastStruct = result.structLogs[result.structLogs.length - 1];
+    lastStruct.op = lastStruct.op.toUpperCase();
+
+    // Check if transaction ran out of gas:
+    if (lastStruct.gasCost > lastStruct.gas) {
+        return {
+            status: ResponseStatus.OUT_OF_GAS,
+            reason: `Out of gas (used ${result.gas - lastStruct.gas} of ${result.gas} gas)`,
+        };
+    }
+
+    // Check if last instruction was JUMP or JUMPI
+    if (lastStruct.op === "JUMP" || lastStruct.op === "JUMPI") {
+        return {
+            status: ResponseStatus.BAD_JUMP,
+            reason: "Bad jump destination"
+        };
+    }
+
+    // Check if last instruction was REVERT
+    if (lastStruct.op === "REVERT") {
+        let reason = result.returnValue;
+        if (result.returnValue.slice(0, 8) === "08c379a0") {
+            reason = web3.eth.abi.decodeParameter("string", result.returnValue.slice(8));
+        }
+        return {
+            status: ResponseStatus.REVERTED,
+            reason,
+        };
+    }
+
+    // Return Bad Instruction
+    return {
+        status: ResponseStatus.BAD_INSTRUCTION,
+        reason: `Bad instruction`,
+    };
 };
 
 export const decodeHex = (hex: string) => {
@@ -122,7 +174,7 @@ export const getSource = async (address: string, network: string): Promise<[any[
         .replace(/}([^\n])/g, "}\n\n$1")
         : null;
 
-    const abi = result.ABI ? JSON.parse(result.ABI) : null;
+    const abi = result.ABI && result.ABI !== "Contract source code not verified" ? JSON.parse(result.ABI) : null;
 
     return [abi, source];
 };

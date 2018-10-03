@@ -22,7 +22,8 @@ export const customStyles = {
     option: (base: React.CSSProperties, state: any) => ({
         ...base,
         borderBottom: "1px dotted pink",
-        color: state.isFullscreen ? "red" : "blue",
+        color: "white",
+        backgroundColor: "#001c3a",
     }),
     control: (base: any) => ({
         ...base,
@@ -32,7 +33,7 @@ export const customStyles = {
         borderRadius: 0,
         background: "white",
         border: 0,
-
+        color: "#001c3a",
     }),
     singleValue: (base: any, state: any) => {
         const opacity = state.isDisabled ? 0.5 : 1;
@@ -42,6 +43,7 @@ export const customStyles = {
             ...base,
             opacity,
             transition,
+            color: "#001c3a",
         };
     }
 };
