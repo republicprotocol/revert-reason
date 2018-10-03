@@ -1,6 +1,13 @@
+import * as qs from "query-string";
 import * as React from "react";
 
 import Select from "react-select";
+
+import history from "./History";
+
+// WithRouter
+import { History, Location } from "history";
+import { match, withRouter } from "react-router-dom";
 
 interface SearchState {
     txHash: string;
@@ -9,6 +16,13 @@ interface SearchState {
 
 interface SearchProps {
     onSubmit: (txHash: string, network: string) => Promise<void>;
+
+
+    // withRouter props
+    history: History;
+    location: Location;
+    match: match<SearchProps>;
+    staticContext: undefined;
 }
 
 const options = [
@@ -17,6 +31,10 @@ const options = [
     // { value: "kovan", label: "Kovan" },
     // { value: "rinkeby", label: "Rinkeby" },
 ];
+const optionMap = {};
+for (const option of options) {
+    optionMap[option.value] = option;
+}
 
 export const customStyles = {
     option: (base: React.CSSProperties, state: any) => ({
@@ -58,6 +76,15 @@ class Search extends React.Component<SearchProps, SearchState> {
         };
     }
 
+    public componentDidMount() {
+        const txHash = qs.parse(this.props.location.search).txHash;
+        const network = qs.parse(this.props.location.search).network;
+        if (txHash) {
+            this.setState({ txHash, network: optionMap[network] || options[0] });
+            this.props.onSubmit(txHash, network);
+        }
+    }
+
     public render() {
         const { txHash, network } = this.state;
 
@@ -97,8 +124,10 @@ class Search extends React.Component<SearchProps, SearchState> {
         const { txHash } = this.state;
         const network = this.state.network.value;
 
+        history.push(`/?txHash=${txHash}&network=${network}`);
+
         this.props.onSubmit(txHash, network);
     }
 }
 
-export default Search;
+export default withRouter(Search);

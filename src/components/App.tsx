@@ -2,8 +2,9 @@ import * as React from "react";
 
 import axios from "axios";
 
-import { HashRouter } from "react-router-dom";
+import { Router } from "react-router-dom";
 
+import history from "./History";
 import Why from "./Why";
 
 import "../styles/App.css";
@@ -34,6 +35,7 @@ class App extends React.Component<AppProps, AppState> {
         let using;
         let latest;
         try {
+            console.log(commitHash);
             using = commitHash.HASH;
             latest = (await axios.get(`./commitHash.json?v=${Math.random().toString(36).substring(7)}`)).data.HASH;
             console.log(latest);
@@ -52,12 +54,12 @@ class App extends React.Component<AppProps, AppState> {
         // tslint:disable:jsx-no-lambda
         return (
             <div className="App">
-                <HashRouter>
+                <Router history={history}>
                     <div className="app">
                         {outOfDate ? <OutOfDate /> : null}
                         <Why />
                     </div>
-                </HashRouter>
+                </Router>
             </div>
         );
         // tslint:enable:jsx-no-lambda
@@ -69,7 +71,7 @@ class App extends React.Component<AppProps, AppState> {
 }
 
 class OutOfDate extends React.Component {
-    public render = () => <div className="outOfDate">This page is out of date. Force refresh the window to update the page (Ctrl-Shift-R or Cmd-Shift-R).</div>;
+    public render = () => <div className="outOfDate">This page is out of date. Force refresh the window to update the page (Ctrl-Shift-R / Cmd-Shift-R or repeated refresh).</div>;
 }
 
 export default App;

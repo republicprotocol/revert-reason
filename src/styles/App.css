@@ -73,13 +73,13 @@ input[type=text]:disabled {
 @media (max-width:800px) {
   .Reason {
     width: 90vw;
-    margin-top: 0px;
+    margin-top: 6px;
   }
 }
 
 @media (max-width:500px) {
   .Reason {
-    width: 98vw;
+    width: 97vw;
   }
 }
 
@@ -140,7 +140,6 @@ input[type=text]:disabled {
   background: rgb(79, 201, 79);
 }
 
-/* 
 /* Loading.tsx */
 /* 
 .lds-dual-ring:after {
@@ -168,9 +167,10 @@ input[type=text]:disabled {
     transform: rotate(360deg);
   }
 } */
-*/ .outOfDate {
+
+.outOfDate {
   color: white;
-  background: rgb(253, 33, 81);
+  background: rgb(255, 101, 101);
   top: 0;
   left: 0;
   width: 100%;

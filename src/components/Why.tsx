@@ -8,6 +8,7 @@ import { abiOutputMapping, getReturnValue, getSource, getWeb3, Response, Respons
 import Search from "./Search";
 import Source, { MarkerDetails } from "./Source";
 
+
 interface WhyState {
     markers: MarkerDetails[];
     transactionReturn: Response | null;
@@ -156,10 +157,6 @@ class Why extends React.Component<WhyProps, WhyState> {
                 });
                 match = regex.exec(source);
             }
-
-            console.log(match);
-
-            // { startRow: row, startCol: 0, endRow: row + 1, endCol: 0, className: "highlighMarker", type: "text" }
 
             if (markers.length > 0) {
                 this.setState({ markers, source });

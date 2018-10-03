@@ -47,7 +47,6 @@ class Source extends React.Component<SourceProps, SourceState> {
         session.setUseWrapMode(true);
 
         const { marker } = this.props;
-        console.log(marker);
         const markers = [{
             ...marker, className: "highlighMarker", type: "text"
         }];
