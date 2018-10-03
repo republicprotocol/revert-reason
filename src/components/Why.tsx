@@ -57,10 +57,10 @@ class Why extends React.Component<WhyProps, WhyState> {
                     inner = <span className="red">{transactionReturn.reason}</span>;
                     break;
                 case ResponseStatus.REVERTED:
-                    inner = <>
+                    inner = transactionReturn.reason ? <>
                         <span className="red">Revert reason: </span>
-                        {transactionReturn.reason || "No revert reason found"}
-                    </>;
+                        {transactionReturn.reason}
+                    </> : "No revert reason found";
                     break;
                 case ResponseStatus.SUCCESS:
                     let returnValue = transactionReturn.reason;

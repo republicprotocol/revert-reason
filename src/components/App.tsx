@@ -35,11 +35,8 @@ class App extends React.Component<AppProps, AppState> {
         let using;
         let latest;
         try {
-            console.log(commitHash);
             using = commitHash.HASH;
             latest = (await axios.get(`./commitHash.json?v=${Math.random().toString(36).substring(7)}`)).data.HASH;
-            console.log(latest);
-            console.log(using);
             if (using !== latest) {
                 this.setState({ outOfDate: true });
             }

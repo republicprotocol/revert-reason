@@ -128,6 +128,9 @@ export const getReturnValue = async (web3: Web3, tx: Transaction): Promise<Respo
     // Check if last instruction was REVERT
     if (lastStruct.op === "REVERT") {
         let reason = result.returnValue;
+        if (!reason) {
+            throw new Error("No revert reason found");
+        }
         if (result.returnValue.slice(0, 8) === "08c379a0") {
             reason = web3.eth.abi.decodeParameter("string", result.returnValue.slice(8));
         }
