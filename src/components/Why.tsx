@@ -76,9 +76,6 @@ class Why extends React.Component<WhyProps, WhyState> {
             resultBlock = <div className="block"><div className="result">{inner}</div></div>;
         }
 
-        // TODO: Show all instances of revert reason in code (multiple Source
-        // instances)
-
         return <div className="Reason">
             <Search onSubmit={this.onSubmit} />
             {loading ? <Loading /> : null}
