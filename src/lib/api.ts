@@ -131,9 +131,14 @@ export const getReturnValue = async (web3: Web3, tx: Transaction): Promise<Respo
         if (!reason) {
             throw new Error("No revert reason found");
         }
+
+        // The error message may be prefixed with the error's type signature
+
+        // 0x08c379a0 is the 4-byte signature of `Error(string)`
         if (result.returnValue.slice(0, 8) === "08c379a0") {
             reason = web3.eth.abi.decodeParameter("string", result.returnValue.slice(8));
         }
+
         return {
             status: ResponseStatus.REVERTED,
             reason,
