@@ -1,7 +1,8 @@
 import axios from "axios";
-
 import Web3 from "web3";
 import { JsonRPCResponse, Transaction } from "web3/types";
+
+import { Client, Network } from "../components/Search";
 
 // Matches a 32-byte transaction ID (starting with 0x)
 const txHashRegExp = new RegExp(/^0x([A-Fa-f0-9]{64})$/);
@@ -31,16 +32,17 @@ interface Trace extends JsonRPCResponse {
 export const getWeb3 = (network: string) => {
     switch (network) {
         case "main":
-        case "mainnet":
+        case Network.Mainnet:
+            // return new Web3(new Web3.providers.HttpProvider("https://rpc.slock.it/mainnet/parity-archived"));
             return new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io:443/remix"));
             break;
-        case "ropsten":
-            return new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io:443/remix"));
+        case Network.Ropsten:
+            return new Web3(new Web3.providers.HttpProvider("https://api.myetherapi.com/rop"));
             break;
-        case "kovan":
-            return new Web3(new Web3.providers.HttpProvider("https://kovan.infura.io:443/remix"));
+        case Network.Kovan:
+            return new Web3(new Web3.providers.HttpProvider("https://rpc.slock.it/kovan/archive"));
             break;
-        case "rinkeby":
+        case Network.Rinkeby:
             return new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io:443/remix"));
             break;
         default:
@@ -54,6 +56,7 @@ export enum ResponseStatus {
     OUT_OF_GAS = "OUT_OF_GAS",
     BAD_INSTRUCTION = "BAD_INSTRUCTION",
     BAD_JUMP = "BAD_JUMP",
+    UNKNOWN = "UNKNOWN",
 }
 
 export interface Response {
@@ -61,7 +64,7 @@ export interface Response {
     reason: string;
 }
 
-export const getReturnValue = async (web3: Web3, tx: Transaction): Promise<Response> => {
+export const getReturnValue = async (web3: Web3, tx: Transaction, client: Client): Promise<Response> => {
     // TODO: Generate Infura API key
 
     if (tx.hash.slice(0, 2) !== "0x") {
@@ -72,15 +75,23 @@ export const getReturnValue = async (web3: Web3, tx: Transaction): Promise<Respo
         throw new Error("Invalid transaction hash.");
     }
 
+    const txParams = client === Client.Parity ?
+        {
+            method: "trace_replayTransaction",
+            params: [tx.hash, ["debug"]],
+            jsonrpc: "2.0",
+            id: 2
+        } : {
+            method: "debug_traceTransaction",
+            params: [tx.hash, {}],
+            jsonrpc: "2.0",
+            id: 2
+        };
+
     // Get trace from Infura
     // TODO: traceTransaction is very heavy. Look into retrieving the memory and
     // stack at the last execution step instead.
-    const response: Trace = await new Promise((resolve: (val: Trace) => void, reject) => web3.currentProvider.send({
-        method: "debug_traceTransaction",
-        params: [tx.hash, {}],
-        jsonrpc: "2.0",
-        id: 2
-    }, (e, val) => {
+    const response: Trace = await new Promise((resolve: (val: Trace) => void, reject) => web3.currentProvider.send(txParams, (e, val) => {
         if (e) { reject(e); return; }
         resolve(val);
     }));
@@ -99,10 +110,20 @@ export const getReturnValue = async (web3: Web3, tx: Transaction): Promise<Respo
 
     const result = response.result;
 
+    const returnValue = result.returnValue || (result as any).output.slice(2);
+
+    if (client === Client.Parity) {
+        const reason = returnValue.slice(0, 8) === "08c379a0" ? web3.eth.abi.decodeParameter("string", returnValue.slice(8)) : `0x${returnValue}`;
+        return {
+            status: ResponseStatus.UNKNOWN,
+            reason
+        };
+    }
+
     if (!result.failed) {
         return {
             status: ResponseStatus.SUCCESS,
-            reason: `0x${result.returnValue}`,
+            reason: `0x${returnValue}`,
         };
     }
 
@@ -127,7 +148,7 @@ export const getReturnValue = async (web3: Web3, tx: Transaction): Promise<Respo
 
     // Check if last instruction was REVERT
     if (lastStruct.op === "REVERT") {
-        let reason = result.returnValue;
+        let reason = returnValue;
         if (!reason) {
             throw new Error("No revert reason found");
         }
@@ -135,8 +156,8 @@ export const getReturnValue = async (web3: Web3, tx: Transaction): Promise<Respo
         // The error message may be prefixed with the error's type signature
 
         // 0x08c379a0 is the 4-byte signature of `Error(string)`
-        if (result.returnValue.slice(0, 8) === "08c379a0") {
-            reason = web3.eth.abi.decodeParameter("string", result.returnValue.slice(8));
+        if (returnValue.slice(0, 8) === "08c379a0") {
+            reason = web3.eth.abi.decodeParameter("string", returnValue.slice(8));
         }
 
         return {

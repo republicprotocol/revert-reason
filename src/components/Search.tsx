@@ -1,37 +1,41 @@
 import * as qs from "query-string";
 import * as React from "react";
 
+import { RouteComponentProps } from "react-router";
+import { withRouter } from "react-router-dom";
 import Select from "react-select";
 
 import history from "./History";
 
-// WithRouter
-import { History, Location } from "history";
-import { match, withRouter } from "react-router-dom";
-
 interface SearchState {
     txHash: string;
-    network: { value: string, label: string };
+    network: { value: Network, label: string, client: Client };
 }
 
-interface SearchProps {
+interface SearchProps extends RouteComponentProps<any> {
     onSubmit: (txHash: string, network: string) => Promise<void>;
+}
 
+export enum Network {
+    Mainnet = "mainnet",
+    Ropsten = "ropsten",
+    Kovan = "kovan",
+    Rinkeby = "rinkeby",
+}
 
-    // withRouter props
-    history: History;
-    location: Location;
-    match: match<SearchProps>;
-    staticContext: undefined;
+export enum Client {
+    Parity,
+    Geth,
 }
 
 const options = [
-    { value: "mainnet", label: "Mainnet" },
-    // { value: "ropsten", label: "Ropsten" },
-    // { value: "kovan", label: "Kovan" },
-    // { value: "rinkeby", label: "Rinkeby" },
+    { value: Network.Mainnet, label: "Mainnet", client: Client.Geth },
+    // { value: Network.Mainnet, label: "Mainnet", client: Client.Parity },
+    // { value: Network.Ropsten, label: "Ropsten", client: Client.Geth },
+    { value: Network.Kovan, label: "Kovan", client: Client.Parity },
+    // { value: Network.Rinkeby, label: "Rinkeby" },
 ];
-const optionMap = {};
+export const optionMap = {};
 for (const option of options) {
     optionMap[option.value] = option;
 }
@@ -77,11 +81,11 @@ class Search extends React.Component<SearchProps, SearchState> {
     }
 
     public componentDidMount() {
-        const txHash = qs.parse(this.props.location.search).txHash;
-        const network = qs.parse(this.props.location.search).network;
+        const txHash = qs.parse(this.props.location.search).txHash as string | undefined;
+        const network = qs.parse(this.props.location.search).network as string | undefined;
         if (txHash) {
-            this.setState({ txHash, network: optionMap[network] || options[0] });
-            this.props.onSubmit(txHash, network);
+            this.setState({ txHash, network: optionMap[network || Network.Mainnet] || options[0] });
+            this.props.onSubmit(txHash, network || Network.Mainnet);
         }
     }
 

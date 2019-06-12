@@ -2,12 +2,12 @@ import * as React from "react";
 
 import { Transaction } from "web3/types";
 
+import {
+    abiOutputMapping, getReturnValue, getSource, getWeb3, Response, ResponseStatus,
+} from "../lib/api";
 import Loading from "./Loading";
-
-import { abiOutputMapping, getReturnValue, getSource, getWeb3, Response, ResponseStatus } from "../lib/api";
-import Search from "./Search";
+import Search, { Client, optionMap } from "./Search";
 import Source, { MarkerDetails } from "./Source";
-
 
 interface WhyState {
     markers: MarkerDetails[];
@@ -72,6 +72,12 @@ class Why extends React.Component<WhyProps, WhyState> {
                         {returnValue}
                     </>;
                     break;
+                case ResponseStatus.UNKNOWN:
+                    inner = transactionReturn.reason ? <>
+                        <span className="yellow">Response: </span>
+                        {transactionReturn.reason}
+                    </> : "No output found";
+                    break;
             }
 
             resultBlock = <div className="block"><div className="result">{inner}</div></div>;
@@ -112,7 +118,9 @@ class Why extends React.Component<WhyProps, WhyState> {
                 throw new Error("Unable to find transaction");
             }
 
-            transactionReturn = await getReturnValue(web3, tx);
+            const client = optionMap[network] ? optionMap[network].client : Client.Geth;
+
+            transactionReturn = await getReturnValue(web3, tx, client);
             this.setState({ loading: false, transactionReturn });
         } catch (error) {
             this.setState({ loading: false, error });

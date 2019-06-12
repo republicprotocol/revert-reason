@@ -1,13 +1,11 @@
 import * as React from "react";
 
 import axios from "axios";
-
 import { Router } from "react-router-dom";
 
+import "../styles/App.css";
 import history from "./History";
 import Why from "./Why";
-
-import "../styles/App.css";
 
 const commitHash = require("../commitHash.json");
 
@@ -55,6 +53,10 @@ class App extends React.Component<AppProps, AppState> {
                     <div className="app">
                         {outOfDate ? <OutOfDate /> : null}
                         <Why />
+                        <details>
+                            <summary>Examples</summary>
+                            Kovan: 0x7e07712e0dd60e2914889e2ebd3acaaaa76739e0ca5d03517db55152817f8a99
+                    </details>
                     </div>
                 </Router>
             </div>
