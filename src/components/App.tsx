@@ -3,7 +3,7 @@ import * as React from "react";
 import axios from "axios";
 import { Router } from "react-router-dom";
 
-import "../styles/App.css";
+import "../styles/App.scss";
 import { ReactComponent as Home } from "../styles/home.svg";
 import history from "./History";
 import { Why } from "./Why";

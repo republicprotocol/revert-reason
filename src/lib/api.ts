@@ -100,7 +100,7 @@ export const getReturnValue = async (web3: Web3, tx: Transaction, client: Client
 
     const result = response.result || response;
 
-    const returnValue = strip0x(result.returnValue) || strip0x((result as any).output);
+    const returnValue = result.returnValue ? strip0x(result.returnValue) : result ? strip0x((result as any).output) : "";
 
     if (client === Client.Parity) {
         const reason = returnValue.slice(0, 8) === "08c379a0" ? web3.eth.abi.decodeParameter("string", `0x${returnValue.slice(8)}`) as any as string : `0x${returnValue}`;

@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import "../styles/Loading.css";
+import "../styles/Loading.scss";
 
 interface LoadingProps {
 }
