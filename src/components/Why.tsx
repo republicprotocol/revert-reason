@@ -1,13 +1,14 @@
 import * as React from "react";
 
-import { Transaction } from "web3/types";
-
 import {
     abiOutputMapping, getReturnValue, getSource, getWeb3, Response, ResponseStatus,
 } from "../lib/api";
 import Loading from "./Loading";
 import Search, { Client, optionMap } from "./Search";
 import Source, { MarkerDetails } from "./Source";
+
+// import { Transaction } from "web3/types";
+type Transaction = any;
 
 interface WhyState {
     markers: MarkerDetails[];
@@ -21,7 +22,7 @@ interface WhyState {
 interface WhyProps {
 }
 
-class Why extends React.Component<WhyProps, WhyState> {
+export class Why extends React.Component<WhyProps, WhyState> {
 
     constructor(props: WhyProps, context: object) {
         super(props, context);
@@ -179,5 +180,3 @@ const rowAndColumn = (str: string): [number, number] => {
     const column = split[split.length - 1].length;
     return [row, column];
 };
-
-export default Why;

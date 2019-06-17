@@ -2,11 +2,12 @@ import * as React from "react";
 
 import "brace";
 import AceEditor from "react-ace";
-// tslint:disable-next-line:no-var-requires
-require("../lib/mode-solidity");
 
 import "brace/theme/dracula";
 import "brace/theme/github";
+
+// tslint:disable-next-line:no-var-requires
+require("../lib/mode-solidity");
 
 interface SourceProps {
     source: string;

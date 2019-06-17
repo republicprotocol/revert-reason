@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 
 import Web3 from "web3";
 
-import App from "./components/App";
+import { App } from "./components/App";
 import "./styles/index.css";
 
 declare global {

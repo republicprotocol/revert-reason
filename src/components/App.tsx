@@ -4,8 +4,9 @@ import axios from "axios";
 import { Router } from "react-router-dom";
 
 import "../styles/App.css";
+import { ReactComponent as Home } from "../styles/home.svg";
 import history from "./History";
-import Why from "./Why";
+import { Why } from "./Why";
 
 const commitHash = require("../commitHash.json");
 
@@ -19,7 +20,7 @@ interface AppState {
     outOfDate: boolean;
 }
 
-class App extends React.Component<AppProps, AppState> {
+export class App extends React.Component<AppProps, AppState> {
     constructor(props: AppProps) {
         super(props);
         this.state = {
@@ -47,16 +48,17 @@ class App extends React.Component<AppProps, AppState> {
     public render() {
         const { outOfDate } = this.state;
         // tslint:disable:jsx-no-lambda
-        return (
-            <div className="App">
-                <Router history={history}>
-                    <div className="app">
-                        {outOfDate ? <OutOfDate /> : null}
-                        <Why />
-                    </div>
-                </Router>
-            </div>
-        );
+        return <div className="App">
+            <Router history={history}>
+                <div className="app">
+                    <a style={{ position: "absolute", top: "20px", left: "20px" }} className="home-link" href="https://republicprotocol.github.io/tool-index/">
+                        <Home style={{ height: "30px", width: "30px" }} />
+                    </a>
+                    {outOfDate ? <OutOfDate /> : null}
+                    <Why />
+                </div>
+            </Router>
+        </div>;
         // tslint:enable:jsx-no-lambda
     }
 
@@ -68,5 +70,3 @@ class App extends React.Component<AppProps, AppState> {
 class OutOfDate extends React.Component {
     public render = () => <div className="outOfDate">This page is out of date. Force refresh the window to update the page (Ctrl-Shift-R / Cmd-Shift-R or repeated refresh).</div>;
 }
-
-export default App;

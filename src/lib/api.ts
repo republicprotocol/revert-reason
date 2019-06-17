@@ -1,8 +1,11 @@
 import axios from "axios";
 import Web3 from "web3";
-import { JsonRPCResponse, Transaction } from "web3/types";
 
 import { Client, Network } from "../components/Search";
+
+// import { JsonRPCResponse, Transaction } from "web3/types";
+type JsonRPCResponse = any;
+type Transaction = any;
 
 // Matches a 32-byte transaction ID (starting with 0x)
 const txHashRegExp = new RegExp(/^0x([A-Fa-f0-9]{64})$/);
@@ -35,16 +38,12 @@ export const getWeb3 = (network: string) => {
         case Network.Mainnet:
             // return new Web3(new Web3.providers.HttpProvider("https://rpc.slock.it/mainnet/parity-archived"));
             return new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io:443/remix"));
-            break;
         case Network.Ropsten:
             return new Web3(new Web3.providers.HttpProvider("https://api.myetherapi.com/rop"));
-            break;
         case Network.Kovan:
             return new Web3(new Web3.providers.HttpProvider("https://rpc.slock.it/kovan/archive"));
-            break;
         case Network.Rinkeby:
             return new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io:443/remix"));
-            break;
         default:
             throw new Error("Unknown network");
     }
@@ -64,6 +63,8 @@ export interface Response {
     reason: string;
 }
 
+export const strip0x = (hex: string) => hex.substring(0, 2) === "0x" ? hex.slice(2) : hex;
+
 export const getReturnValue = async (web3: Web3, tx: Transaction, client: Client): Promise<Response> => {
     // TODO: Generate Infura API key
 
@@ -75,26 +76,17 @@ export const getReturnValue = async (web3: Web3, tx: Transaction, client: Client
         throw new Error("Invalid transaction hash.");
     }
 
-    const txParams = client === Client.Parity ?
-        {
-            method: "trace_replayTransaction",
-            params: [tx.hash, ["debug"]],
-            jsonrpc: "2.0",
-            id: 2
-        } : {
-            method: "debug_traceTransaction",
-            params: [tx.hash, {}],
-            jsonrpc: "2.0",
-            id: 2
-        };
+    let method = "debug_traceTransaction";
+    let params = [tx.hash, {}];
+    if (client === Client.Parity) {
+        method = "trace_replayTransaction";
+        params = [tx.hash, ["debug"]];
+    }
 
     // Get trace from Infura
     // TODO: traceTransaction is very heavy. Look into retrieving the memory and
     // stack at the last execution step instead.
-    const response: Trace = await new Promise((resolve: (val: Trace) => void, reject) => web3.currentProvider.send(txParams, (e, val) => {
-        if (e) { reject(e); return; }
-        resolve(val);
-    }));
+    const response: Trace = await (web3.currentProvider as any).send(method, params);
 
     if (response.error) {
         const error: TraceError = response.error as any;
@@ -104,16 +96,14 @@ export const getReturnValue = async (web3: Web3, tx: Transaction, client: Client
         throw new Error(error.message);
     }
 
-    if (!response.result) {
-        throw new Error("No response from Ethereum node");
-    }
+    // console.log(response);
 
-    const result = response.result;
+    const result = response.result || response;
 
-    const returnValue = result.returnValue || (result as any).output.slice(2);
+    const returnValue = strip0x(result.returnValue) || strip0x((result as any).output);
 
     if (client === Client.Parity) {
-        const reason = returnValue.slice(0, 8) === "08c379a0" ? web3.eth.abi.decodeParameter("string", returnValue.slice(8)) : `0x${returnValue}`;
+        const reason = returnValue.slice(0, 8) === "08c379a0" ? web3.eth.abi.decodeParameter("string", `0x${returnValue.slice(8)}`) as any as string : `0x${returnValue}`;
         return {
             status: ResponseStatus.UNKNOWN,
             reason
@@ -157,7 +147,7 @@ export const getReturnValue = async (web3: Web3, tx: Transaction, client: Client
 
         // 0x08c379a0 is the 4-byte signature of `Error(string)`
         if (returnValue.slice(0, 8) === "08c379a0") {
-            reason = web3.eth.abi.decodeParameter("string", returnValue.slice(8));
+            reason = web3.eth.abi.decodeParameter("string", `0x${returnValue.slice(8)}`) as any as string;
         }
 
         return {
@@ -192,7 +182,7 @@ export const getSource = async (address: string, network: string): Promise<[any[
     // TODO: Use network param
     const URL = `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${address}`;
 
-    const result = (await axios.get(URL)).data.result[0];
+    const result = (await axios.get(URL, { timeout: 500000 })).data.result[0];
 
     const source = result.SourceCode ? result.SourceCode
         .replace(/([^\n\s]+)\t/g, "$1\n\t")
