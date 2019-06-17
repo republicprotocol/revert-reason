@@ -1,8 +1,8 @@
 {
-  "name": "renhack-revert-reason",
+  "name": "revert-reason",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://republicprotocol.github.io/renhack-revert-reason",
+  "homepage": "https://republicprotocol.github.io/revert-reason",
   "dependencies": {
     "@types/query-string": "^6.1.0",
     "@types/react-router-dom": "^4.3.0",

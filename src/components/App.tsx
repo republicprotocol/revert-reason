@@ -53,10 +53,6 @@ class App extends React.Component<AppProps, AppState> {
                     <div className="app">
                         {outOfDate ? <OutOfDate /> : null}
                         <Why />
-                        <details>
-                            <summary>Examples</summary>
-                            Kovan: 0x7e07712e0dd60e2914889e2ebd3acaaaa76739e0ca5d03517db55152817f8a99
-                    </details>
                     </div>
                 </Router>
             </div>
