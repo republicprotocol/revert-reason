@@ -2,6 +2,7 @@ import axios from "axios";
 import Web3 from "web3";
 
 import { Client, Network } from "../components/Search";
+import { strip0x } from "../reason/strip0x.gen";
 
 // import { JsonRPCResponse, Transaction } from "web3/types";
 type JsonRPCResponse = any;
@@ -62,8 +63,6 @@ export interface Response {
     status: ResponseStatus;
     reason: string;
 }
-
-export const strip0x = (hex: string) => hex.substring(0, 2) === "0x" ? hex.slice(2) : hex;
 
 export const getReturnValue = async (web3: Web3, tx: Transaction, client: Client): Promise<Response> => {
     // TODO: Generate Infura API key

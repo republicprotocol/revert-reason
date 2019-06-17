@@ -19,8 +19,8 @@
     "web3": "^1.0.0-beta.35"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "bsb -make-world && react-scripts start",
+    "build": "bsb -make-world && react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
@@ -32,6 +32,8 @@
     "@types/react": "^16.8.19",
     "@types/react-dom": "^16.8.4",
     "@types/underscore": "^1.8.18",
+    "bs-platform": "^5.0.4",
+    "gentype": "^2.29.0",
     "gh-pages": "^2.0.1",
     "react-scripts": "^3.0.1",
     "tslint-microsoft-contrib": "^6.2.0",
