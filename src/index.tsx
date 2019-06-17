@@ -4,8 +4,6 @@ import * as ReactDOM from "react-dom";
 import Web3 from "web3";
 
 import App from "./components/App";
-import registerServiceWorker from "./registerServiceWorker";
-
 import "./styles/index.css";
 
 declare global {
@@ -18,4 +16,3 @@ ReactDOM.render(
   <App />,
   document.getElementById("root") as HTMLElement
 );
-registerServiceWorker();
