@@ -1,6 +1,16 @@
 {
-  "main.css": "static/css/main.395ca919.css",
-  "main.css.map": "static/css/main.395ca919.css.map",
-  "main.js": "static/js/main.c0c95496.js",
-  "main.js.map": "static/js/main.c0c95496.js.map"
+  "files": {
+    "main.css": "/revert-reason/static/css/main.9490a647.chunk.css",
+    "main.js": "/revert-reason/static/js/main.ebd5b288.chunk.js",
+    "main.js.map": "/revert-reason/static/js/main.ebd5b288.chunk.js.map",
+    "runtime~main.js": "/revert-reason/static/js/runtime~main.0570f80d.js",
+    "runtime~main.js.map": "/revert-reason/static/js/runtime~main.0570f80d.js.map",
+    "static/js/2.8a62a3e9.chunk.js": "/revert-reason/static/js/2.8a62a3e9.chunk.js",
+    "static/js/2.8a62a3e9.chunk.js.map": "/revert-reason/static/js/2.8a62a3e9.chunk.js.map",
+    "index.html": "/revert-reason/index.html",
+    "precache-manifest.2dcca5c48ba7e960ced0db9f9cd2d614.js": "/revert-reason/precache-manifest.2dcca5c48ba7e960ced0db9f9cd2d614.js",
+    "service-worker.js": "/revert-reason/service-worker.js",
+    "static/css/main.9490a647.chunk.css.map": "/revert-reason/static/css/main.9490a647.chunk.css.map",
+    "static/media/home.203c69b7.svg": "/revert-reason/static/media/home.203c69b7.svg"
+  }
 }
